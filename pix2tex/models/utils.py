@@ -36,14 +36,14 @@ class Model(nn.Module):
 #         return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), self.args.max_seq_len,
 #                                      eos_token=self.args.eos_token, context=self.encoder(x), temperature=temperature)
 #!!!!!
-@torch.no_grad()
-def generate(self, x: torch.Tensor, temperature: float = 0.25, **kwargs):
-    args = Munch(self.args)
-    args.update(kwargs)
-    args.temperature = temperature
-    # return self.decoder.beam_generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
-    return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
-
+    @torch.no_grad()
+    def generate(self, x: torch.Tensor, temperature: float = 5, **kwargs):
+        args = Munch(self.args)
+        args.update(kwargs)
+        args.temperature = temperature
+        # return self.decoder.beam_generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
+        return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
+    
 def get_model(args):
     if args.encoder_structure.lower() == 'vit':
         encoder = vit.get_encoder(args)
