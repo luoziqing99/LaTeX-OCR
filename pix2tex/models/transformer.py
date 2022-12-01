@@ -4,6 +4,50 @@ from x_transformers.autoregressive_wrapper import AutoregressiveWrapper, top_k, 
 from x_transformers import TransformerWrapper, Decoder
 
 
+class BeamHypotheses(object):
+    def __init__(self, num_beams: int, length_penalty: float):
+        """
+        Initialize n-best list of hypotheses.
+        """
+        self.length_penalty = length_penalty
+        self.num_beams = num_beams
+        self.beams = []
+        self.worst_score = 1e9
+
+    def __len__(self):
+        """
+        Number of hypotheses in the list.
+        """
+        return len(self.beams)
+
+    def add(self, hyp: torch.LongTensor, sum_logprobs: float):
+        """
+        Add a new hypothesis to the list.
+        """
+        score = sum_logprobs / len(hyp) ** self.length_penalty
+        if len(self) < self.num_beams or score > self.worst_score:
+            self.beams.append((score, hyp))
+            if len(self) > self.num_beams:
+                sorted_scores = sorted(
+                    [(s, idx) for idx, (s, _) in enumerate(self.beams)])
+                del self.beams[sorted_scores[0][1]]
+                self.worst_score = sorted_scores[1][0]
+            else:
+                self.worst_score = min(score, self.worst_score)
+
+    def is_done(self, best_sum_logprobs: float, cur_len: int):
+        """
+        If there are enough hypotheses and that none of the hypotheses being generated can become better than the worst
+        one in the heap, then we are done with this sentence.
+        """
+        if len(self) < self.num_beams:
+            return False
+        else:
+            cur_score = best_sum_logprobs / cur_len ** self.length_penalty
+            ret = self.worst_score >= cur_score
+            return ret
+
+
 class CustomARWrapper(AutoregressiveWrapper):
     def __init__(self, *args, **kwargs):
         super(CustomARWrapper, self).__init__(*args, **kwargs)
