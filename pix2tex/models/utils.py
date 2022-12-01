@@ -4,6 +4,7 @@ import torch.nn as nn
 from . import hybrid
 from . import vit
 from . import transformer
+from munch import Munch
 
 
 class Model(nn.Module):
