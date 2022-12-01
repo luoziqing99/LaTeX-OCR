@@ -42,8 +42,8 @@ class Model(nn.Module):
         args = Munch(self.args)
         args.update(kwargs)
         args.temperature = temperature
-        # return self.decoder.beam_generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
-        return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
+        return self.decoder.beam_generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
+        #return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), context=self.encoder(x), seq_len=self.args.max_seq_len, **args)
     
 def get_model(args):
     if args.encoder_structure.lower() == 'vit':
